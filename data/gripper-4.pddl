@@ -1,0 +1,1 @@
+(define (problem griper-4) (:domain gripper))

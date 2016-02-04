@@ -1,0 +1,12 @@
+.DS_Store
+*~
+pddl
+pddl.dSYM/
+bin/
+*.tab.hh
+location.hh
+position.hh
+stack.hh
+src/*.yy.cc
+src/*.tab.cc
+src/*.output
