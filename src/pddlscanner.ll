@@ -21,9 +21,12 @@ static yy::location loc;
 
 %option noyywrap nounput batch debug noinput
 
-name  [a-zA-Z][a-zA-Z_0-9\-]*
-int   [0-9]+
-blank [ \t]
+name      [a-zA-Z][a-zA-Z_0-9\-]*
+variable  \?[a-zA-Z][a-zA-Z_0-9\-]*
+int       [0-9]+
+blank     [ \t]
+
+requirekey (":strips"|":typing"|":equality")
 
 %{
 // Code run each time a pattern is matched.
@@ -41,13 +44,34 @@ loc.step ();
 [\n\r]+               { loc.lines(yyleng); loc.step(); };
 
 "define"              { return yy::PDDLParser::make_DEFINE(loc); };
+
 "domain"|":domain"    { return yy::PDDLParser::make_DOMAIN(loc); };
 "problem"             { return yy::PDDLParser::make_PROBLEM(loc); };
+
+":requirements"       { return yy::PDDLParser::make_REQUIREMENTS(loc); };
+
+":predicates"         { return yy::PDDLParser::make_PREDICATES(loc); };
+
+":action"             { return yy::PDDLParser::make_ACTION(loc); };
+":parameters"         { return yy::PDDLParser::make_PARAMETERS(loc); };
+":precondition"       { return yy::PDDLParser::make_PRECONDITIONS(loc); };
+":effect"             { return yy::PDDLParser::make_EFFECTS(loc); };
+
+":objects"            { return yy::PDDLParser::make_OBJECTS(loc); };
+":init"               { return yy::PDDLParser::make_INIT(loc); };
+":goal"               { return yy::PDDLParser::make_GOAL(loc); };
+
+"and"|"AND"           { return yy::PDDLParser::make_AND(loc); };
+"not"|"NOT"           { return yy::PDDLParser::make_NOT(loc); };
+
+{requirekey}          { return yy::PDDLParser::make_REQUIREKEY(loc); };
+
 
 "("                   { return yy::PDDLParser::make_LPAREN(loc); };
 ")"                   { return yy::PDDLParser::make_RPAREN(loc); };
 
 {name}                { return yy::PDDLParser::make_NAME(yytext, loc); };
+{variable}            { return yy::PDDLParser::make_VARIABLE(yytext, loc); };
 
 {int} {
     errno = 0;
