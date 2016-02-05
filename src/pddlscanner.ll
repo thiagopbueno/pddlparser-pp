@@ -50,6 +50,8 @@ loc.step ();
 
 ":requirements"       { return yy::PDDLParser::make_REQUIREMENTS(loc); };
 
+":types"              { return yy::PDDLParser::make_TYPES(loc); };
+":constants"          { return yy::PDDLParser::make_CONSTANTS(loc); };
 ":predicates"         { return yy::PDDLParser::make_PREDICATES(loc); };
 
 ":action"             { return yy::PDDLParser::make_ACTION(loc); };
@@ -69,6 +71,7 @@ loc.step ();
 
 "("                   { return yy::PDDLParser::make_LPAREN(loc); };
 ")"                   { return yy::PDDLParser::make_RPAREN(loc); };
+"-"                   { return yy::PDDLParser::make_HYPHEN(loc); };
 
 {name}                { return yy::PDDLParser::make_NAME(yytext, loc); };
 {variable}            { return yy::PDDLParser::make_VARIABLE(yytext, loc); };

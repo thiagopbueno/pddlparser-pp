@@ -36,14 +36,13 @@ class PDDLDriver;
 
 %define api.token.prefix {TOK_}
 %token
-    END  0          "end of file"
-    LPAREN          "("
-    RPAREN          ")"
     DEFINE          "define"
     DOMAIN          "domain"
     PROBLEM         "problem"
-    PREDICATES      "predicates"
     REQUIREMENTS    "requirements"
+    TYPES           "types"
+    CONSTANTS       "constants"
+    PREDICATES      "predicates"
     REQUIREKEY      "requirekey"
     ACTION          "action"
     PARAMETERS      "parameters"
@@ -55,6 +54,10 @@ class PDDLDriver;
     OBJECTS         "objects"
     INIT            "init"
     GOAL            "goal"
+    LPAREN          "("
+    RPAREN          ")"
+    HYPHEN           "-"
+    END  0          "end of file"
 ;
 %token <std::string>    NAME            "name"
 %token <std::string>    VARIABLE        "variable"
@@ -76,11 +79,22 @@ pddl
     | problem { driver.print_problem(); }
     ;
 
-domain: LPAREN DEFINE domain-name requirements predicates actions RPAREN {} ;
+domain: LPAREN DEFINE domain-name domain-body RPAREN {} ;
 
 domain-name: LPAREN DOMAIN NAME RPAREN { driver.domain = $$ = $3; } ;
 
+domain-body
+    : requirements predicates actions {}
+    | requirements constants predicates actions {}
+    | requirements types predicates actions {}
+    | requirements types constants predicates actions {}
+    ;
+
 requirements: LPAREN REQUIREMENTS requirekeys-list RPAREN {} ;
+
+types: LPAREN TYPES names-list RPAREN {} ;
+
+constants: LPAREN CONSTANTS typed-names-list RPAREN {} ;
 
 predicates: LPAREN PREDICATES predicates-list RPAREN {} ;
 
@@ -92,7 +106,8 @@ actions
 action-def: LPAREN ACTION NAME parameters action-def-body RPAREN { std::cout << "action: " + $3 << std::endl; } ;
 
 parameters
-    : PARAMETERS LPAREN variables-list RPAREN {}
+    : PARAMETERS LPAREN typed-variables-list RPAREN {}
+    | PARAMETERS LPAREN variables-list RPAREN {}
     | PARAMETERS LPAREN RPAREN {}
     ;
 
@@ -127,9 +142,19 @@ names-list
     | names-list NAME {}
     ;
 
+typed-names-list
+    : names-list HYPHEN NAME {}
+    | typed-names-list names-list HYPHEN NAME {}
+    ;
+
 variables-list
     : VARIABLE {}
     | variables-list VARIABLE {}
+    ;
+
+typed-variables-list
+    : variables-list HYPHEN NAME {}
+    | typed-variables-list variables-list HYPHEN NAME {}
     ;
 
 literal-list
@@ -152,9 +177,9 @@ grounded-atomic-formula
     | LPAREN AND grounded-literal-list RPAREN {}
     ;
 
-
 predicate
-    : LPAREN NAME variables-list RPAREN {}
+    : LPAREN NAME typed-variables-list RPAREN {}
+    | LPAREN NAME variables-list RPAREN {}
     | LPAREN EQUAL VARIABLE VARIABLE RPAREN {}
     ;
 
