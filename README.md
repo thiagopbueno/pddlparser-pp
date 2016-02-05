@@ -2,7 +2,7 @@
 
 Domain and problem **PDDL parser** in C/C++ using **Flex & Bison**.
 
-The parser uses the (BNF Description of PDDL3.0)[http://zeus.ing.unibs.it/ipc-5/bnf.pdf] and currently supports the following ```:requirements``` :
+The parser uses the [BNF Description of PDDL3.0](http://zeus.ing.unibs.it/ipc-5/bnf.pdf) and currently supports the following ```:requirements``` :
 
 * ```:strips```
 * ```:typing```
@@ -14,6 +14,12 @@ The parser uses the (BNF Description of PDDL3.0)[http://zeus.ing.unibs.it/ipc-5/
 $ make clean && make
 $ ./pddl <domain.pddl> <problem.pddl>
 ```
+
+## File Description
+
+** pddldriver.hh / pddldriver.cc : provides the context information for the lexer and parser and implements the client interface;
+** pddlscanner.ll : defines the scanner rules for lexical analysis;
+** pddlparser.hh : defines the parser rules for syntactical analysis;
 
 ## LICENSE
 
