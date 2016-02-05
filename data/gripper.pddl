@@ -1,5 +1,5 @@
 (define (domain gripper)
-	(:requirements :strips)
+	(:requirements :strips :equality)
 
 	(:predicates
 		(ROOM ?x) (BALL ?x) (GRIPPER ?x)
@@ -8,7 +8,7 @@
 
 	(:action move
 		:parameters (?x ?y)
-		:precondition (and (ROOM ?x) (ROOM ?y)(at-robby ?x))
+		:precondition (and (ROOM ?x) (ROOM ?y) (not (= ?x ?y)) (at-robby ?x))
 		:effect (and (at-robby ?y) (not (at-robby ?x))))
 
 	(:action pick-up

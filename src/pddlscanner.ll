@@ -63,9 +63,9 @@ loc.step ();
 
 "and"|"AND"           { return yy::PDDLParser::make_AND(loc); };
 "not"|"NOT"           { return yy::PDDLParser::make_NOT(loc); };
+"="                   { return yy::PDDLParser::make_EQUAL(loc); };
 
 {requirekey}          { return yy::PDDLParser::make_REQUIREKEY(loc); };
-
 
 "("                   { return yy::PDDLParser::make_LPAREN(loc); };
 ")"                   { return yy::PDDLParser::make_RPAREN(loc); };

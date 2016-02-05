@@ -51,6 +51,7 @@ class PDDLDriver;
     EFFECTS         "effects"
     AND             "and"
     NOT             "not"
+    EQUAL           "="
     OBJECTS         "objects"
     INIT            "init"
     GOAL            "goal"
@@ -152,9 +153,15 @@ grounded-atomic-formula
     ;
 
 
-predicate: LPAREN NAME variables-list RPAREN {} ;
+predicate
+    : LPAREN NAME variables-list RPAREN {}
+    | LPAREN EQUAL VARIABLE VARIABLE RPAREN {}
+    ;
 
-grounded-predicate: LPAREN NAME names-list RPAREN {} ;
+grounded-predicate
+    : LPAREN NAME names-list RPAREN {}
+    | LPAREN EQUAL NAME NAME RPAREN {}
+    ;
 
 literal
     : predicate {}
