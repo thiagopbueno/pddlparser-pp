@@ -1,6 +1,12 @@
 # pddlparser-pp
 
-Domain and problem PDDL parser in C/C++ using Flex & Bison.
+Domain and problem **PDDL parser** in C/C++ using **Flex & Bison**.
+
+The parser uses the (BNF Description of PDDL3.0)[http://zeus.ing.unibs.it/ipc-5/bnf.pdf] and currently supports the following ```:requirements``` :
+
+* ```:strips```
+* ```:typing```
+* ```equality```
 
 ## Usage
 
