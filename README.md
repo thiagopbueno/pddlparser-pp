@@ -17,9 +17,10 @@ $ ./pddl <domain.pddl> <problem.pddl>
 
 ## File Description
 
-** pddldriver.hh / pddldriver.cc : provides the context information for the lexer and parser and implements the client interface;
-** pddlscanner.ll : defines the scanner rules for lexical analysis;
-** pddlparser.hh : defines the parser rules for syntactical analysis;
+* pddldriver.hh/pddldriver.cc: provides the context information for the lexer and parser and implements the client interface;
+* pddlscanner.ll: defines the scanner rules for lexical analysis;
+* pddlparser.hh: defines the parser rules for syntactical analysis;
+* main.cc: defines the tracing level and starts the parsing process.
 
 ## LICENSE
 
