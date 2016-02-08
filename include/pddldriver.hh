@@ -3,6 +3,7 @@
 
 #include "pddlparser.tab.hh"
 #include "domain.hh"
+#include "problem.hh"
 
 #include <string>
 
@@ -18,7 +19,7 @@ public:
     virtual ~PDDLDriver();
 
     Domain *domain;
-    std::string problem;
+    Problem *problem;
 
     // Handling the scanner.
     void scan_begin();

@@ -7,11 +7,13 @@ PDDLDriver::PDDLDriver()
 {
     trace_parsing = trace_scanning = false;
     domain = nullptr;
+    problem = nullptr;
 }
 
 PDDLDriver::~PDDLDriver ()
 {
-    delete domain;
+    if (domain)  delete domain;
+    if (problem) delete problem;
 }
 
 int

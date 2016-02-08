@@ -4,10 +4,17 @@
 
 using namespace std;
 
+void usage(char *filename);
+
 int
 main (int argc, char *argv[])
 {
-    int res = 0;
+    if (argc < 3) {
+        usage(argv[0]);
+        return -1;
+    }
+
+    int result = 0;
 
     PDDLDriver driver;
 
@@ -18,13 +25,26 @@ main (int argc, char *argv[])
         else if (argv[i] == string ("-s")) {
             driver.trace_scanning = true;
         }
-        else if (!driver.parse (argv[i])) {
-            cout << *driver.domain;
+        else if (!driver.parse(argv[i])) {
+            cout << "Parsing " << argv[i] << "... ";
+            if (!result) cout << "ok!" << endl;
+            else cout << "Error!" << endl;
         }
         else {
-            res = 1;
+            result = -2;
+            break;
         }
     }
 
-    return res;
+    cout << endl;
+    cout << *driver.domain << endl;
+    cout << *driver.problem << endl;
+
+    return result;
+}
+
+void
+usage(char *filename)
+{
+    cout << "usage: " << filename << "[-s] [-p] <domain.pddl> <problem.pddl>" << endl;
 }

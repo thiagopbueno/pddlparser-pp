@@ -11,7 +11,7 @@
 class Domain {
 public:
 	Domain(const std::string &name);
-	~Domain();
+	virtual ~Domain();
 
 	void add_action(const Action *action);
 

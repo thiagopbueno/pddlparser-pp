@@ -11,7 +11,9 @@
 %code requires
 {
 #include <string>
+
 #include "domain.hh"
+#include "problem.hh"
 #include "action.hh"
 
 class PDDLDriver;
@@ -60,14 +62,15 @@ class PDDLDriver;
     HYPHEN           "-"
     END  0          "end of file"
 ;
-%token <std::string>    NAME            "name"
-%token <std::string>    VARIABLE        "variable"
-%token <int>            NUMBER          "number"
+%token <std::string>    NAME                "name"
+%token <std::string>    VARIABLE            "variable"
+%token <int>            NUMBER              "number"
 
-%type <std::string>     domain-name     "domain-name"
-%type <std::string>     problem-name    "problem-name"
+%type <std::string>     domain-name         "domain-name"
+%type <std::string>     problem-name        "problem-name"
+%type <std::string>     domain-reference    "domain-reference"
 
-%type <Action*>         action-def      "action-def"
+%type <Action*>         action-def          "action-def"
 
 %printer { yyoutput << $$; } <*>;
 
@@ -127,9 +130,18 @@ preconditions: PRECONDITIONS atomic-formula {} ;
 
 effects: EFFECTS atomic-formula {} ;
 
-problem: LPAREN DEFINE problem-name domain-name objects init goal RPAREN {} ;
+problem: LPAREN DEFINE problem-name domain-reference objects init goal RPAREN {} ;
 
-problem-name: LPAREN PROBLEM NAME RPAREN { driver.problem = $$ = $3; } ;
+problem-name: LPAREN PROBLEM NAME RPAREN
+    {
+        $$ = $3;
+        driver.problem = new Problem($$);
+    } ;
+
+domain-reference: LPAREN DOMAIN NAME RPAREN
+    {
+        $$ = $3;
+    }
 
 objects: LPAREN OBJECTS names-list RPAREN {} ;
 

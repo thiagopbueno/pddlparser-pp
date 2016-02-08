@@ -8,7 +8,7 @@ FLEX=$(FLEXPATH)/bin/flex
 BISON=$(BISONPATH)/bin/bison
 
 INCLUDE=-Iinclude/ -Isrc/
-OBJ=bin/parser.o bin/scanner.o bin/driver.o bin/action.o bin/domain.o bin/main.o
+OBJ=bin/parser.o bin/scanner.o bin/driver.o bin/action.o bin/domain.o bin/problem.o bin/main.o
 
 .PHONY: all
 all: pddl
@@ -20,6 +20,9 @@ bin/main.o: src/main.cc
 	$(CC) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
 bin/domain.o: src/domain.cc
+	$(CC) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
+
+bin/problem.o: src/problem.cc
 	$(CC) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
 bin/action.o: src/action.cc
