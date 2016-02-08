@@ -11,7 +11,8 @@
 %code requires
 {
 #include <string>
-#include <iostream>
+#include "domain.hh"
+#include "action.hh"
 
 class PDDLDriver;
 }
@@ -66,6 +67,8 @@ class PDDLDriver;
 %type <std::string>     domain-name     "domain-name"
 %type <std::string>     problem-name    "problem-name"
 
+%type <Action*>         action-def      "action-def"
+
 %printer { yyoutput << $$; } <*>;
 
 
@@ -75,13 +78,17 @@ class PDDLDriver;
 %start pddl;
 
 pddl
-    : domain  { driver.print_domain(); }
-    | problem { driver.print_problem(); }
+    : domain  {}
+    | problem {}
     ;
 
 domain: LPAREN DEFINE domain-name domain-body RPAREN {} ;
 
-domain-name: LPAREN DOMAIN NAME RPAREN { driver.domain = $$ = $3; } ;
+domain-name: LPAREN DOMAIN NAME RPAREN
+    {
+        $$ = $3;
+        driver.domain = new Domain($$);
+    } ;
 
 domain-body
     : requirements predicates actions {}
@@ -99,11 +106,14 @@ constants: LPAREN CONSTANTS typed-names-list RPAREN {} ;
 predicates: LPAREN PREDICATES predicates-list RPAREN {} ;
 
 actions
-    : action-def {}
-    | actions action-def {}
+    : action-def { driver.domain->add_action($1); }
+    | actions action-def { driver.domain->add_action($2); }
     ;
 
-action-def: LPAREN ACTION NAME parameters action-def-body RPAREN { std::cout << "action: " + $3 << std::endl; } ;
+action-def: LPAREN ACTION NAME parameters action-def-body RPAREN
+    {
+        $$ = new Action($3);
+    };
 
 parameters
     : PARAMETERS LPAREN typed-variables-list RPAREN {}

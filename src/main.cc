@@ -19,7 +19,7 @@ main (int argc, char *argv[])
             driver.trace_scanning = true;
         }
         else if (!driver.parse (argv[i])) {
-            cout << driver.result << endl;
+            cout << *driver.domain;
         }
         else {
             res = 1;

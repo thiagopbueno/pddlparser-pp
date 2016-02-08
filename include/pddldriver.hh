@@ -2,11 +2,13 @@
 #define _PDDL_DRIVER_HH_
 
 #include "pddlparser.tab.hh"
+#include "domain.hh"
 
 #include <string>
 
 // Tell Flex the lexer's prototype ...
 # define YY_DECL yy::PDDLParser::symbol_type yylex (PDDLDriver& driver)
+
 // ... and declare it for the parser's sake.
 YY_DECL;
 
@@ -15,7 +17,7 @@ public:
     PDDLDriver();
     virtual ~PDDLDriver();
 
-    std::string domain;
+    Domain *domain;
     std::string problem;
 
     // Handling the scanner.
@@ -38,9 +40,6 @@ public:
     // Error handling.
     void error(const yy::location& l, const std::string& m);
     void error(const std::string& m);
-
-    void print_domain();
-    void print_problem();
-
 };
+
 #endif // ! _PDDL_DRIVER_HH_
