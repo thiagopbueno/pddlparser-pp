@@ -12,7 +12,32 @@ The parser uses the [BNF Description of PDDL3.0](http://zeus.ing.unibs.it/ipc-5/
 
 ```
 $ make clean && make
-$ ./pddl [-p] [-s] <domain.pddl> <problem.pddl>
+$ ./pddl
+
+usage: ./pddl [-s] [-p] <domain.pddl> <problem.pddl>
+
+Domain and problem PDDL parser in C/C++ using Flex & Bison.
+https://github.com/thiagopbueno/pddlparser-pp
+
+OPTIONS:
+ -s	enable scanning trace.
+ -p	enable parsing trace.
+```
+
+## Example
+
+```
+$ ./pddl data/gripper.pddl data/gripper-4.pddl
+
+Parsing data/gripper.pddl... ok!
+Parsing data/gripper-4.pddl... ok!
+
+>> Domain(name:gripper)
+Action(name:move, params:[?x, ?y])
+Action(name:pick-up, params:[?x, ?y, ?z])
+Action(name:drop, params:[?x, ?y, ?z])
+
+>> Problem(name:griper-4)
 ```
 
 ## File Description
