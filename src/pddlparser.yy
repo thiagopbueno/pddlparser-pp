@@ -11,6 +11,7 @@
 %code requires
 {
 #include <string>
+#include <vector>
 
 #include "domain.hh"
 #include "problem.hh"
@@ -72,6 +73,9 @@ class PDDLDriver;
 
 %type <Action*>         action-def          "action-def"
 
+%type <std::vector<std::string>*> parameters-list "parameters-list"
+%type <std::vector<std::string>*> variables-list  "variables-list"
+
 %printer { yyoutput << $$; } <*>;
 
 
@@ -113,15 +117,15 @@ actions
     | actions action-def { driver.domain->add_action($2); }
     ;
 
-action-def: LPAREN ACTION NAME parameters action-def-body RPAREN
+action-def: LPAREN ACTION NAME parameters-list action-def-body RPAREN
     {
-        $$ = new Action($3);
+        $$ = new Action($3, $4);
     };
 
-parameters
+parameters-list
     : PARAMETERS LPAREN typed-variables-list RPAREN {}
-    | PARAMETERS LPAREN variables-list RPAREN {}
-    | PARAMETERS LPAREN RPAREN {}
+    | PARAMETERS LPAREN variables-list RPAREN { $$ = $3; }
+    | PARAMETERS LPAREN RPAREN { $$ = nullptr; }
     ;
 
 action-def-body: preconditions effects {} ;
@@ -170,8 +174,8 @@ typed-names-list
     ;
 
 variables-list
-    : VARIABLE {}
-    | variables-list VARIABLE {}
+    : /* empty */ { $$ = new std::vector<std::string>; }
+    | variables-list VARIABLE { $1->push_back($2); $$ = $1; }
     ;
 
 typed-variables-list

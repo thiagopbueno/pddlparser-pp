@@ -14,6 +14,7 @@
 #undef yywrap
 #define yywrap() 1
 
+
 // The location of the current token.
 static yy::location loc;
 

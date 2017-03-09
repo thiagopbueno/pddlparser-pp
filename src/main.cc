@@ -37,8 +37,8 @@ main (int argc, char *argv[])
     }
 
     cout << endl;
-    cout << *driver.domain << endl;
-    cout << *driver.problem << endl;
+    cout << *(driver.domain) << endl;
+    cout << *(driver.problem) << endl;
 
     return result;
 }
@@ -46,5 +46,12 @@ main (int argc, char *argv[])
 void
 usage(char *filename)
 {
-    cout << "usage: " << filename << "[-s] [-p] <domain.pddl> <problem.pddl>" << endl;
+    cout << "usage: " << filename << " [-s] [-p] <domain.pddl> <problem.pddl>" << endl;
+    cout << endl;
+    cout << "Domain and problem PDDL parser in C/C++ using Flex & Bison." << endl;
+    cout << "https://github.com/thiagopbueno/pddlparser-pp" << endl;
+    cout << endl;
+    cout << "OPTIONS:" << endl;
+    cout << " -s\tenable scanning trace." << endl;
+    cout << " -p\tenable parsing trace."  << endl;
 }

@@ -2,14 +2,32 @@
 
 using namespace std;
 
-Action::Action(const string &name) : _name(name)
+Action::Action(const string& name, const vector<string> *parameters) :
+	_name(name), _parameters(parameters)
 {
 
 }
 
-ostream &
-operator<<(ostream &os, const Action &action)
+Action::~Action()
 {
-	os << "Action(name:" << action._name << ")" << endl;
-	return os;
+	delete _parameters;
+}
+
+ostream &
+operator<<(ostream& out, const Action& action)
+{
+	out << "Action(name:" << action._name;
+	out << ", params:[";
+	auto size = action._parameters->size();
+	for (decltype(size) i = 0; i < size; ++i) {
+		if (i == 0) {
+			out << (*action._parameters)[i];
+		}
+		else {
+			out << ", " << (*action._parameters)[i];
+		}
+	}
+	out << "]";
+	out << ")" << endl;
+	return out;
 }
