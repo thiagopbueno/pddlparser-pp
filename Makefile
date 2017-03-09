@@ -38,7 +38,7 @@ bin/parser.o: src/pddlparser.yy
 
 bin/scanner.o: src/pddlscanner.ll
 	$(FLEX) --outfile=src/pddllex.yy.cc $<
-	$(CC) $(CXXFLAGS) $(INCLUDE) -c src/pddllex.yy.cc -o $@
+	$(CC) $(CXXFLAGS) -Wno-macro-redefined $(INCLUDE) -c src/pddllex.yy.cc -o $@
 
 .PHONY: clean
 clean:
