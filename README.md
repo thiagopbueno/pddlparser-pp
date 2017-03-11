@@ -33,9 +33,22 @@ Parsing data/gripper.pddl... ok!
 Parsing data/gripper-4.pddl... ok!
 
 >> Domain(name:gripper)
-Action(name:move, params:[?x, ?y])
-Action(name:pick-up, params:[?x, ?y, ?z])
-Action(name:drop, params:[?x, ?y, ?z])
+
+Action(name:move)
+>> params:[?x, ?y]
+>> preconditions:[ROOM(?x), ROOM(?y), not =(?x,?y), at-robby(?x)]
+>> effects:[at-robby(?y), not at-robby(?x)])
+
+Action(name:pick-up)
+>> params:[?x, ?y, ?z]
+>> preconditions:[BALL(?x), ROOM(?y), GRIPPER(?z), at-ball(?x,?y), at-robby(?y), free(?z)]
+>> effects:[carry(?z,?x), not at-ball(?x,?y), not free(?z)])
+
+Action(name:drop)
+>> params:[?x, ?y, ?z]
+>> preconditions:[BALL(?x), ROOM(?y), GRIPPER(?z), carry(?z,?x), at-robby(?y)]
+>> effects:[at-ball(?x,?y), free(?z), not carry(?z,?x)])
+
 
 >> Problem(name:griper-4)
 ```
