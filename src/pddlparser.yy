@@ -12,10 +12,16 @@
 {
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include "domain.hh"
 #include "problem.hh"
 #include "action.hh"
+#include "predicate.hh"
+
+using PredicateList = std::vector<Predicate*>;
+using ActionDefBody = std::pair<PredicateList*,PredicateList*>;
+using StringList    = std::vector<std::string>;
 
 class PDDLDriver;
 }
@@ -63,18 +69,28 @@ class PDDLDriver;
     HYPHEN           "-"
     END  0          "end of file"
 ;
-%token <std::string>    NAME                "name"
-%token <std::string>    VARIABLE            "variable"
-%token <int>            NUMBER              "number"
+%token <std::string>     NAME                "name"
+%token <std::string>     VARIABLE            "variable"
+%token <int>             NUMBER              "number"
 
-%type <std::string>     domain-name         "domain-name"
-%type <std::string>     problem-name        "problem-name"
-%type <std::string>     domain-reference    "domain-reference"
+%type <std::string>      domain-name         "domain-name"
+%type <std::string>      problem-name        "problem-name"
+%type <std::string>      domain-reference    "domain-reference"
 
-%type <Action*>         action-def          "action-def"
+%type <Action*>          action-def           "action-def"
+%type <ActionDefBody*>   action-def-body      "action-def-body"
 
-%type <std::vector<std::string>*> parameters-list "parameters-list"
-%type <std::vector<std::string>*> variables-list  "variables-list"
+%type <PredicateList*>   atomic-formula      "atomic-formula"
+%type <PredicateList*>   preconditions-list  "preconditions-list"
+%type <PredicateList*>   effects-list        "effects-list"
+
+%type <Predicate*>       predicate           "predicate"
+%type <Predicate*>       literal             "literal"
+
+%type <StringList*>      parameters-list     "parameters-list"
+%type <StringList*>      variables-list      "variables-list"
+%type <PredicateList*>   literal-list        "literal-list"
+
 
 %printer { yyoutput << $$; } <*>;
 
@@ -119,7 +135,8 @@ actions
 
 action-def: LPAREN ACTION NAME parameters-list action-def-body RPAREN
     {
-        $$ = new Action($3, $4);
+        $$ = new Action($3, $4, $5->first, $5->second);
+        delete $5;
     };
 
 parameters-list
@@ -128,11 +145,14 @@ parameters-list
     | PARAMETERS LPAREN RPAREN { $$ = nullptr; }
     ;
 
-action-def-body: preconditions effects {} ;
+action-def-body: preconditions-list effects-list
+    {
+        $$ = new std::pair<PredicateList*,PredicateList*>($1, $2);
+    };
 
-preconditions: PRECONDITIONS atomic-formula {} ;
+preconditions-list: PRECONDITIONS atomic-formula { $$ = $2; } ;
 
-effects: EFFECTS atomic-formula {} ;
+effects-list: EFFECTS atomic-formula { $$ = $2; } ;
 
 problem: LPAREN DEFINE problem-name domain-reference objects init goal RPAREN {} ;
 
@@ -174,7 +194,7 @@ typed-names-list
     ;
 
 variables-list
-    : /* empty */ { $$ = new std::vector<std::string>; }
+    : /* empty */ { $$ = new StringList; }
     | variables-list VARIABLE { $1->push_back($2); $$ = $1; }
     ;
 
@@ -184,8 +204,8 @@ typed-variables-list
     ;
 
 literal-list
-    : literal {}
-    | literal-list literal {}
+    : /* empty */ { $$ = new std::vector<Predicate*>; }
+    | literal-list literal { $1->push_back($2); $$ = $1; }
     ;
 
 grounded-literal-list
@@ -194,8 +214,8 @@ grounded-literal-list
     ;
 
 atomic-formula
-    : literal {}
-    | LPAREN AND literal-list RPAREN {}
+    : literal { $$ = new std::vector<Predicate*>; $$->push_back($1); }
+    | LPAREN AND literal-list RPAREN { $$ = $3; }
     ;
 
 grounded-atomic-formula
@@ -205,8 +225,14 @@ grounded-atomic-formula
 
 predicate
     : LPAREN NAME typed-variables-list RPAREN {}
-    | LPAREN NAME variables-list RPAREN {}
-    | LPAREN EQUAL VARIABLE VARIABLE RPAREN {}
+    | LPAREN NAME variables-list RPAREN { $$ = new Predicate($2, $3); }
+    | LPAREN EQUAL VARIABLE VARIABLE RPAREN
+        {
+            StringList *args = new StringList(2);
+            (*args)[0] = $3;
+            (*args)[1] = $4;
+            $$ = new Predicate("=", args);
+        }
     ;
 
 grounded-predicate
@@ -215,8 +241,8 @@ grounded-predicate
     ;
 
 literal
-    : predicate {}
-    | LPAREN NOT predicate RPAREN {}
+    : predicate { $$ = $1; }
+    | LPAREN NOT predicate RPAREN { $3->negate(); $$ = $3; }
     ;
 
 grounded-literal

@@ -37,7 +37,7 @@ main (int argc, char *argv[])
     }
 
     cout << endl;
-    cout << *(driver.domain) << endl;
+    cout << *(driver.domain)  << endl;
     cout << *(driver.problem) << endl;
 
     return result;

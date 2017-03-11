@@ -22,11 +22,13 @@ Domain::add_action(const Action *action)
 }
 
 std::ostream&
-operator<<(std::ostream& os, const Domain& domain)
+operator<<(std::ostream& out, const Domain& domain)
 {
-	os << ">> Domain(name:" << domain._name << ")" << endl;
+	out << ">> Domain(name:" << domain._name << ")" << endl;
+	out << endl;
 	for (auto const& action : domain._actions) {
-		os << *action;
+		out << *action;
+		out << endl;
 	}
-	return os;
+	return out;
 }
