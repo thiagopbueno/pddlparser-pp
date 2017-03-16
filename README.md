@@ -53,6 +53,33 @@ Action(name:drop)
 >> Problem(name:griper-4)
 ```
 
+```
+$ ./pddl data/gripper-typed.pddl data/gripper-4.pddl
+
+Parsing data/gripper-typed.pddl... ok!
+Parsing data/gripper-4.pddl... ok!
+
+>> Domain(name:gripper-typed)
+
+Action(name:move)
+>> params:[?from - room, ?to - room]
+>> preconditions:[at-robby(?from)]
+>> effects:[at-robby(?to), not at-robby(?from)])
+
+Action(name:pick)
+>> params:[?gripper - gripper, ?obj - ball, ?room - room]
+>> preconditions:[at(?obj,?room), at-robby(?room), free(?gripper)]
+>> effects:[carry(?obj,?gripper), not at(?obj,?room), not free(?gripper)])
+
+Action(name:drop)
+>> params:[?gripper - gripper, ?obj - ball, ?room - room]
+>> preconditions:[ball(?obj), room(?room), gripper(?gripper), carry(?obj,?gripper), at-robby(?room)]
+>> effects:[at(?obj,?room), free(?gripper), not carry(?obj,?gripper)])
+
+
+>> Problem(name:griper-4)
+```
+
 ## File Description
 
 * pddldriver.hh/pddldriver.cc: implements the client interface;
