@@ -1,5 +1,5 @@
 CC=g++
-CXXFLAGS=-Wall -Wextra -ansi -pedantic -std=c++11 -g
+CXXFLAGS=-Wall -Wextra -ansi -pedantic -std=c++11 -O2
 
 FLEXPATH=/usr/local/opt/flex
 BISONPATH=/usr/local/opt/bison
@@ -45,6 +45,7 @@ bin/scanner.o: src/pddlscanner.ll
 
 check: pddl
 	./pddl data/gripper.pddl data/gripper-4.pddl
+	./pddl data/gripper-typed.pddl data/gripper-4.pddl
 
 .PHONY: clean
 clean:

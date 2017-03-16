@@ -19,9 +19,15 @@
 #include "action.hh"
 #include "predicate.hh"
 
-using PredicateList = std::vector<Predicate*>;
-using ActionDefBody = std::pair<PredicateList*,PredicateList*>;
 using StringList    = std::vector<std::string>;
+using TypeDict      = std::map<std::string,std::string>;
+
+using PredicateList = std::vector<Predicate*>;
+using ArgumentList  = std::pair<StringList*,TypeDict*>;
+
+using ParameterList = std::pair<StringList*,TypeDict*>;
+using ActionDefBody = std::pair<PredicateList*,PredicateList*>;
+
 
 class PDDLDriver;
 }
@@ -69,27 +75,30 @@ class PDDLDriver;
     HYPHEN           "-"
     END  0          "end of file"
 ;
-%token <std::string>     NAME                "name"
-%token <std::string>     VARIABLE            "variable"
-%token <int>             NUMBER              "number"
+%token <std::string>       NAME                   "name"
+%token <std::string>       VARIABLE               "variable"
+%token <int>               NUMBER                 "number"
 
-%type <std::string>      domain-name         "domain-name"
-%type <std::string>      problem-name        "problem-name"
-%type <std::string>      domain-reference    "domain-reference"
+%type <std::string>        domain-name            "domain-name"
+%type <std::string>        problem-name           "problem-name"
+%type <std::string>        domain-reference       "domain-reference"
 
-%type <Action*>          action-def           "action-def"
-%type <ActionDefBody*>   action-def-body      "action-def-body"
+%type <Action*>            action-def             "action-def"
+%type <ActionDefBody*>     action-def-body        "action-def-body"
 
-%type <PredicateList*>   atomic-formula      "atomic-formula"
-%type <PredicateList*>   preconditions-list  "preconditions-list"
-%type <PredicateList*>   effects-list        "effects-list"
+%type <PredicateList*>     preconditions-list     "preconditions-list"
+%type <PredicateList*>     effects-list           "effects-list"
+%type <PredicateList*>     atomic-formula         "atomic-formula"
 
-%type <Predicate*>       predicate           "predicate"
-%type <Predicate*>       literal             "literal"
+%type <Predicate*>         predicate              "predicate"
+%type <Predicate*>         literal                "literal"
 
-%type <StringList*>      parameters-list     "parameters-list"
-%type <StringList*>      variables-list      "variables-list"
-%type <PredicateList*>   literal-list        "literal-list"
+%type <PredicateList*>     predicates-list        "predicates-list"
+%type <ParameterList*>     parameters-list        "parameters-list"
+%type <PredicateList*>     literal-list           "literal-list"
+
+%type <TypeDict*>          typed-variables-list   "typed-variables-list"
+%type <StringList*>        variables-list         "variables-list"
 
 
 %printer { yyoutput << $$; } <*>;
@@ -122,14 +131,20 @@ domain-body
 
 requirements: LPAREN REQUIREMENTS requirekeys-list RPAREN {} ;
 
-types: LPAREN TYPES names-list RPAREN {} ;
+types
+    : LPAREN TYPES names-list RPAREN {}
+    | LPAREN TYPES typed-names-list RPAREN {}
+    ;
 
-constants: LPAREN CONSTANTS typed-names-list RPAREN {} ;
+constants
+    : LPAREN CONSTANTS names-list RPAREN {}
+    | LPAREN CONSTANTS typed-names-list RPAREN {}
+    ;
 
 predicates: LPAREN PREDICATES predicates-list RPAREN {} ;
 
 actions
-    : action-def { driver.domain->add_action($1); }
+    : action-def         { driver.domain->add_action($1); }
     | actions action-def { driver.domain->add_action($2); }
     ;
 
@@ -139,10 +154,28 @@ action-def: LPAREN ACTION NAME parameters-list action-def-body RPAREN
         delete $5;
     };
 
+predicates-list
+    : /* empty */               { $$ = new PredicateList;    }
+    | predicates-list predicate { $1->push_back($2); $$ = $1;}
+    ;
+
 parameters-list
-    : PARAMETERS LPAREN typed-variables-list RPAREN {}
-    | PARAMETERS LPAREN variables-list RPAREN { $$ = $3; }
-    | PARAMETERS LPAREN RPAREN { $$ = nullptr; }
+    : PARAMETERS LPAREN typed-variables-list RPAREN
+        {
+            StringList *parameters = new StringList();
+            for (const auto& param : *$3) {
+                parameters->push_back(param.first);
+            }
+            $$ = new ParameterList(parameters, $3);
+        }
+    | PARAMETERS LPAREN variables-list RPAREN
+        {
+            $$ = new ParameterList($3, nullptr);
+        }
+    | PARAMETERS LPAREN RPAREN
+        {
+            $$ = new ParameterList(nullptr, nullptr);
+        }
     ;
 
 action-def-body: preconditions-list effects-list
@@ -178,11 +211,6 @@ requirekeys-list
     | requirekeys-list REQUIREKEY {}
     ;
 
-predicates-list
-    : predicate {}
-    | predicates-list predicate {}
-    ;
-
 names-list
     : NAME {}
     | names-list NAME {}
@@ -199,12 +227,26 @@ variables-list
     ;
 
 typed-variables-list
-    : variables-list HYPHEN NAME {}
-    | typed-variables-list variables-list HYPHEN NAME {}
+    : variables-list HYPHEN NAME
+        {
+            std::string type($3);
+            $$ = new TypeDict;
+            for (const auto& var : *$1) {
+                (*$$)[var] = type;
+            }
+        }
+    | typed-variables-list variables-list HYPHEN NAME
+        {
+            std::string type($4);
+            for (const auto& var : *$2) {
+                (*$1)[var] = type;
+            }
+            $$ = $1;
+        }
     ;
 
 literal-list
-    : /* empty */ { $$ = new std::vector<Predicate*>; }
+    : /* empty */          { $$ = new PredicateList;     }
     | literal-list literal { $1->push_back($2); $$ = $1; }
     ;
 
@@ -214,7 +256,7 @@ grounded-literal-list
     ;
 
 atomic-formula
-    : literal { $$ = new std::vector<Predicate*>; $$->push_back($1); }
+    : literal { $$ = new PredicateList; $$->push_back($1); }
     | LPAREN AND literal-list RPAREN { $$ = $3; }
     ;
 
@@ -224,13 +266,26 @@ grounded-atomic-formula
     ;
 
 predicate
-    : LPAREN NAME typed-variables-list RPAREN {}
-    | LPAREN NAME variables-list RPAREN { $$ = new Predicate($2, $3); }
+    : LPAREN NAME typed-variables-list RPAREN
+        {
+            StringList *vars = new StringList;
+            for (const auto& var : *$3) {
+                vars->push_back(var.first);
+            }
+            auto args = new ArgumentList(vars, $3);
+            $$ = new Predicate($2, args);
+        }
+    | LPAREN NAME variables-list RPAREN
+        {
+            auto args = new ArgumentList($3, nullptr);
+            $$ = new Predicate($2, args);
+        }
     | LPAREN EQUAL VARIABLE VARIABLE RPAREN
         {
-            StringList *args = new StringList(2);
-            (*args)[0] = $3;
-            (*args)[1] = $4;
+            StringList *vars = new StringList(2);
+            (*vars)[0] = $3;
+            (*vars)[1] = $4;
+            auto args = new ArgumentList(vars, nullptr);
             $$ = new Predicate("=", args);
         }
     ;
@@ -249,6 +304,7 @@ grounded-literal
     : grounded-predicate {}
     | LPAREN NOT grounded-predicate RPAREN {}
     ;
+
 
 %%
 

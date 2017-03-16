@@ -1,15 +1,16 @@
 #include "predicate.hh"
 using namespace std;
 
-Predicate::Predicate(string name, vector<string> *args, bool negated) :
-	_name(name), _args(args), _negated(negated)
+Predicate::Predicate(string name, ArgumentList *args, bool negated) :
+	_name(name), _args(args->first), _types(args->second), _negated(negated)
 {
 
 }
 
 Predicate::~Predicate()
 {
-	delete _args;
+	if (_args)  delete _args;
+	if (_types) delete _types;
 }
 
 ostream&
