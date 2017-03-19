@@ -23,10 +23,12 @@ using StringList    = std::vector<std::string>;
 using TypeDict      = std::map<std::string,std::string>;
 
 using PredicateList = std::vector<Predicate*>;
+using ParameterList = std::pair<StringList*,TypeDict*>;
 using ArgumentList  = std::pair<StringList*,TypeDict*>;
 
-using ParameterList = std::pair<StringList*,TypeDict*>;
-using ActionDefBody = std::pair<PredicateList*,PredicateList*>;
+using Literal       = std::pair<Predicate*,bool>;
+using AtomicFormula = std::vector<Literal*>;
+using ActionDefBody = std::pair<AtomicFormula*,AtomicFormula*>;
 
 
 class PDDLDriver;
@@ -86,16 +88,16 @@ class PDDLDriver;
 %type <Action*>            action-def             "action-def"
 %type <ActionDefBody*>     action-def-body        "action-def-body"
 
-%type <PredicateList*>     preconditions-list     "preconditions-list"
-%type <PredicateList*>     effects-list           "effects-list"
-%type <PredicateList*>     atomic-formula         "atomic-formula"
+%type <AtomicFormula*>     preconditions-list     "preconditions-list"
+%type <AtomicFormula*>     effects-list           "effects-list"
+%type <AtomicFormula*>     atomic-formula         "atomic-formula"
 
 %type <Predicate*>         predicate              "predicate"
-%type <Predicate*>         literal                "literal"
+%type <Literal*>           literal                "literal"
 
 %type <PredicateList*>     predicates-list        "predicates-list"
 %type <ParameterList*>     parameters-list        "parameters-list"
-%type <PredicateList*>     literal-list           "literal-list"
+%type <AtomicFormula*>     literal-list           "literal-list"
 
 %type <TypeDict*>          typed-variables-list   "typed-variables-list"
 %type <StringList*>        variables-list         "variables-list"
@@ -180,7 +182,7 @@ parameters-list
 
 action-def-body: preconditions-list effects-list
     {
-        $$ = new std::pair<PredicateList*,PredicateList*>($1, $2);
+        $$ = new ActionDefBody($1, $2);
     };
 
 preconditions-list: PRECONDITIONS atomic-formula { $$ = $2; } ;
@@ -246,7 +248,7 @@ typed-variables-list
     ;
 
 literal-list
-    : /* empty */          { $$ = new PredicateList;     }
+    : /* empty */          { $$ = new AtomicFormula;     }
     | literal-list literal { $1->push_back($2); $$ = $1; }
     ;
 
@@ -256,7 +258,7 @@ grounded-literal-list
     ;
 
 atomic-formula
-    : literal { $$ = new PredicateList; $$->push_back($1); }
+    : literal { $$ = new AtomicFormula; $$->push_back($1); }
     | LPAREN AND literal-list RPAREN { $$ = $3; }
     ;
 
@@ -296,8 +298,8 @@ grounded-predicate
     ;
 
 literal
-    : predicate { $$ = $1; }
-    | LPAREN NOT predicate RPAREN { $3->negate(); $$ = $3; }
+    : predicate { $$ = new Literal($1, true); }
+    | LPAREN NOT predicate RPAREN { $$ = new Literal($3, false); }
     ;
 
 grounded-literal

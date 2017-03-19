@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 #include <map>
 #include <iostream>
 
@@ -13,15 +14,15 @@ using TypeDict         = std::map<std::string,std::string>;
 
 using PredicateList    = std::vector<Predicate*>;
 using ParameterList    = std::pair<StringList*,TypeDict*>;
-using PreconditionList = std::vector<Predicate*>;
-using EffectList       = std::vector<Predicate*>;
+using PreconditionList = std::vector<std::pair<Predicate*,bool>*>;
+using EffectList       = std::vector<std::pair<Predicate*,bool>*>;
 
 class Action {
 public:
 	Action(
 		const std::string&      name,
-		const ParameterList    *parameters,
-		const PreconditionList *preconditions,
+		const ParameterList    *params,
+		const PreconditionList *precond,
 		const EffectList       *effects
 	);
 
@@ -31,9 +32,9 @@ public:
 
 private:
 	std::string             _name;
-	const StringList       *_parameters;
+	const StringList       *_params;
 	const TypeDict         *_types;
-	const PreconditionList *_preconditions;
+	const PreconditionList *_precond;
 	const EffectList       *_effects;
 };
 

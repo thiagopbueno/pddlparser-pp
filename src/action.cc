@@ -4,25 +4,25 @@ using namespace std;
 
 Action::Action(
 	const string&        name,
-	const ParameterList *parameters,
-	const PredicateList *preconditions,
-	const PredicateList *effects) :
+	const ParameterList *params,
+	const PreconditionList *precond,
+	const EffectList *effects) :
 		_name(name),
-		_parameters(parameters->first), _types(parameters->second),
-		_preconditions(preconditions), _effects(effects)
+		_params(params->first), _types(params->second),
+		_precond(precond), _effects(effects)
 {
 
 }
 
 Action::~Action()
 {
-	if (_parameters) delete _parameters;
+	if (_params) delete _params;
 	if (_types)      delete _types;
 
-	for (auto precondition : *_preconditions) {
+	for (auto precondition : *_precond) {
 		delete precondition;
 	}
-	if (_preconditions) delete _preconditions;
+	if (_precond) delete _precond;
 
 	for (auto effect : *_effects) {
 		delete effect;
@@ -34,11 +34,11 @@ ostream &
 operator<<(ostream& out, const Action& action)
 {
 	out << "Action(name:" << action._name << ")" << endl;
-	if (action._parameters) {
+	if (action._params) {
 		out << ">> params:[";
-		auto size = action._parameters->size();
+		auto size = action._params->size();
 		for (decltype(size) i = 0; i < size; ++i) {
-			auto parameter = (*action._parameters)[i];
+			auto parameter = (*action._params)[i];
 			if (i == 0) {
 				out << parameter;
 			}
@@ -51,25 +51,37 @@ operator<<(ostream& out, const Action& action)
 		}
 		out << "]" << endl;
 	}
-	out << ">> preconditions:[";
-	auto size = action._preconditions->size();
+	out << ">> precond:[";
+	auto size = action._precond->size();
 	for (decltype(size) i = 0; i < size; ++i) {
+		auto literal   = (*action._precond)[i];
+		auto predicate = literal->first;
+		bool positive  = literal->second;
 		if (i == 0) {
-			out << *(*action._preconditions)[i];
+			if (!positive) out << "NOT ";
+			out << *predicate;
 		}
 		else {
-			out << ", " << *(*action._preconditions)[i];
+			out << ", ";
+			if (!positive) out << "NOT ";
+			out << *predicate;
 		}
 	}
 	out << "]" << endl;
 	size = action._effects->size();
 	out << ">> effects:[";
 	for (decltype(size) i = 0; i < size; ++i) {
+		auto literal   = (*action._effects)[i];
+		auto predicate = literal->first;
+		bool positive  = literal->second;
 		if (i == 0) {
-			out << *(*action._effects)[i];
+			if (!positive) out << "NOT ";
+			out << *predicate;
 		}
 		else {
-			out << ", " << *(*action._effects)[i];
+			out << ", ";
+			if (!positive) out << "NOT ";
+			out << *predicate;
 		}
 	}
 	out << "])" << endl;

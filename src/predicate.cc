@@ -1,8 +1,8 @@
 #include "predicate.hh"
 using namespace std;
 
-Predicate::Predicate(string name, ArgumentList *args, bool negated) :
-	_name(name), _args(args->first), _types(args->second), _negated(negated)
+Predicate::Predicate(string name, ArgumentList *args) :
+	_name(name), _args(args->first), _types(args->second)
 {
 
 }
@@ -16,9 +16,6 @@ Predicate::~Predicate()
 ostream&
 operator<<(ostream& out, const Predicate& predicate)
 {
-	if (predicate._negated) {
-		out << "not ";
-	}
 	out << predicate._name << "(";
 	int i = 0;
 	for (auto arg : *(predicate._args)) {

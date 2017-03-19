@@ -36,21 +36,22 @@ Parsing data/gripper-4.pddl... ok!
 
 Action(name:move)
 >> params:[?x, ?y]
->> preconditions:[ROOM(?x), ROOM(?y), not =(?x,?y), at-robby(?x)]
->> effects:[at-robby(?y), not at-robby(?x)])
+>> precond:[ROOM(?x), ROOM(?y), NOT =(?x,?y), at-robby(?x)]
+>> effects:[at-robby(?y), NOT at-robby(?x)])
 
 Action(name:pick-up)
 >> params:[?x, ?y, ?z]
->> preconditions:[BALL(?x), ROOM(?y), GRIPPER(?z), at-ball(?x,?y), at-robby(?y), free(?z)]
->> effects:[carry(?z,?x), not at-ball(?x,?y), not free(?z)])
+>> precond:[BALL(?x), ROOM(?y), GRIPPER(?z), at-ball(?x,?y), at-robby(?y), free(?z)]
+>> effects:[carry(?z,?x), NOT at-ball(?x,?y), NOT free(?z)])
 
 Action(name:drop)
 >> params:[?x, ?y, ?z]
->> preconditions:[BALL(?x), ROOM(?y), GRIPPER(?z), carry(?z,?x), at-robby(?y)]
->> effects:[at-ball(?x,?y), free(?z), not carry(?z,?x)])
+>> precond:[BALL(?x), ROOM(?y), GRIPPER(?z), carry(?z,?x), at-robby(?y)]
+>> effects:[at-ball(?x,?y), free(?z), NOT carry(?z,?x)])
 
 
 >> Problem(name:griper-4)
+
 ```
 
 ```
@@ -63,18 +64,18 @@ Parsing data/gripper-4.pddl... ok!
 
 Action(name:move)
 >> params:[?from - room, ?to - room]
->> preconditions:[at-robby(?from)]
->> effects:[at-robby(?to), not at-robby(?from)])
+>> precond:[at-robby(?from)]
+>> effects:[at-robby(?to), NOT at-robby(?from)])
 
 Action(name:pick)
 >> params:[?gripper - gripper, ?obj - ball, ?room - room]
->> preconditions:[at(?obj,?room), at-robby(?room), free(?gripper)]
->> effects:[carry(?obj,?gripper), not at(?obj,?room), not free(?gripper)])
+>> precond:[at(?obj,?room), at-robby(?room), free(?gripper)]
+>> effects:[carry(?obj,?gripper), NOT at(?obj,?room), NOT free(?gripper)])
 
 Action(name:drop)
 >> params:[?gripper - gripper, ?obj - ball, ?room - room]
->> preconditions:[ball(?obj), room(?room), gripper(?gripper), carry(?obj,?gripper), at-robby(?room)]
->> effects:[at(?obj,?room), free(?gripper), not carry(?obj,?gripper)])
+>> precond:[ball(?obj), room(?room), gripper(?gripper), carry(?obj,?gripper), at-robby(?room)]
+>> effects:[at(?obj,?room), free(?gripper), NOT carry(?obj,?gripper)])
 
 
 >> Problem(name:griper-4)
