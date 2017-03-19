@@ -1,5 +1,5 @@
 CC=g++
-CXXFLAGS=-Wall -Wextra -ansi -pedantic -std=c++11 -O2
+CXXFLAGS=-Wall -Wextra -pedantic -std=c++11 -O2
 
 FLEXPATH=/usr/local/opt/flex
 BISONPATH=/usr/local/opt/bison

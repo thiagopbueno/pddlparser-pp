@@ -157,7 +157,7 @@ action-def: LPAREN ACTION NAME parameters-list action-def-body RPAREN
     };
 
 predicates-list
-    : /* empty */               { $$ = new PredicateList;    }
+    : predicate { $$ = new PredicateList; $$->push_back($1); }
     | predicates-list predicate { $1->push_back($2); $$ = $1;}
     ;
 
@@ -224,7 +224,7 @@ typed-names-list
     ;
 
 variables-list
-    : /* empty */ { $$ = new StringList; }
+    : VARIABLE { $$ = new StringList; $$->push_back($1); }
     | variables-list VARIABLE { $1->push_back($2); $$ = $1; }
     ;
 
@@ -248,7 +248,7 @@ typed-variables-list
     ;
 
 literal-list
-    : /* empty */          { $$ = new AtomicFormula;     }
+    : literal { $$ = new AtomicFormula; $$->push_back($1); }
     | literal-list literal { $1->push_back($2); $$ = $1; }
     ;
 
