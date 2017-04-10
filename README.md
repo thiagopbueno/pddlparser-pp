@@ -34,6 +34,9 @@ Parsing data/gripper-4.pddl... ok!
 
 >> Domain(name:gripper)
 
+Requirements: [ :strips :equality ]
+Predicates: [ ROOM(?x) BALL(?x) GRIPPER(?x) at-robby(?x) at-ball(?x,?y) free(?x) carry(?x,?y) ]
+
 Action(name:move)
 >> params:[?x, ?y]
 >> precond:[ROOM(?x), ROOM(?y), NOT =(?x,?y), at-robby(?x)]
@@ -51,7 +54,6 @@ Action(name:drop)
 
 
 >> Problem(name:griper-4)
-
 ```
 
 ```
@@ -61,6 +63,9 @@ Parsing data/gripper-typed.pddl... ok!
 Parsing data/gripper-4.pddl... ok!
 
 >> Domain(name:gripper-typed)
+
+Requirements: [ :strips :typing ]
+Predicates: [ at-robby(?r) at(?b,?r) free(?g) carry(?g,?o) ]
 
 Action(name:move)
 >> params:[?from - room, ?to - room]
