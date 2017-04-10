@@ -83,52 +83,55 @@ class PDDLDriver;
     HYPHEN           "-"
     END  0          "end of file"
 ;
-%token <std::string>       NAME                   "name"
-%token <int>               NUMBER                 "number"
-%token <std::string>       VARIABLE               "variable"
-%token <std::string>       REQUIREKEY             "requirekey"
+%token <std::string>       NAME                     "name"
+%token <int>               NUMBER                   "number"
+%token <std::string>       VARIABLE                 "variable"
+%token <std::string>       REQUIREKEY               "requirekey"
 
-%type <Domain*>            domain-def             "domain-def"
-%type <std::string>        domain-name            "domain-name"
-%type <DomainBody*>        domain-body            "domain-body"
+%type <Domain*>            domain-def               "domain-def"
+%type <std::string>        domain-name              "domain-name"
+%type <DomainBody*>        domain-body              "domain-body"
 
-%type <Problem*>           problem-def            "problem-def"
-%type <std::string>        problem-name           "problem-name"
-%type <std::string>        domain-reference       "domain-reference"
+%type <Problem*>           problem-def              "problem-def"
+%type <std::string>        problem-name             "problem-name"
+%type <std::string>        domain-reference         "domain-reference"
 
-%type <ActionList*>        actions                "actions"
-%type <Action*>            action-def             "action-def"
-%type <ActionDefBody*>     action-def-body        "action-def-body"
+%type <ActionList*>        actions                  "actions"
+%type <Action*>            action-def               "action-def"
+%type <ActionDefBody*>     action-def-body          "action-def-body"
 
-%type <LiteralList*>     preconditions-list     "preconditions-list"
-%type <LiteralList*>     effects-list           "effects-list"
-%type <LiteralList*>     atomic-formula         "atomic-formula"
+%type <LiteralList*>     preconditions-list         "preconditions-list"
+%type <LiteralList*>     effects-list               "effects-list"
+%type <LiteralList*>     atomic-formula             "atomic-formula"
 
-%type <Predicate*>         predicate              "predicate"
-%type <Predicate*>         grounded-predicate     "grounded-predicate"
+%type <Predicate*>         predicate                "predicate"
+%type <Predicate*>         grounded-predicate       "grounded-predicate"
 
-%type <Literal*>           literal                "literal"
-%type <LiteralList*>       literal-list           "literal-list"
+%type <Literal*>           literal                  "literal"
+%type <LiteralList*>       literal-list             "literal-list"
 
-%type <Literal*>           grounded-literal       "grounded-literal"
-%type <LiteralList*>       grounded-literal-list  "grounded-literal-list"
+%type <Literal*>           grounded-literal         "grounded-literal"
+%type <LiteralList*>       grounded-literal-list    "grounded-literal-list"
+%type <LiteralList*>       grounded-atomic-formula  "grounded-atomic-formula"
 
-%type <StringList*>        requirements-def      "requirements-def"
-%type <StringList*>        requirekeys-list       "requirekeys-list"
+%type <StringList*>        requirements-def         "requirements-def"
+%type <StringList*>        requirekeys-list         "requirekeys-list"
 
-%type <PredicateList*>     predicates-def         "predicates-def"
-%type <PredicateList*>     predicates-list        "predicates-list"
-%type <ParameterList*>     parameters-list        "parameters-list"
+%type <PredicateList*>     predicates-def           "predicates-def"
+%type <PredicateList*>     predicates-list          "predicates-list"
+%type <ParameterList*>     parameters-list          "parameters-list"
 
-%type <TypeDict*>          typed-variables-list   "typed-variables-list"
-%type <StringList*>        variables-list         "variables-list"
+%type <TypeDict*>          typed-variables-list     "typed-variables-list"
+%type <StringList*>        variables-list           "variables-list"
 
-%type <StringList*>        names-list             "names-list"
-%type <TypeDict*>          typed-names-list       "typed-names-list"
+%type <StringList*>        names-list               "names-list"
+%type <TypeDict*>          typed-names-list         "typed-names-list"
 
-%type <StringList*>        objects-def            "objects-def"
+%type <StringList*>        objects-def              "objects-def"
 
-%type <LiteralList*>       init-def               "init-def"
+%type <LiteralList*>       init-def                 "init-def"
+%type <LiteralList*>       goal-def                 "goal-def"
+
 
 %printer { yyoutput << $$; } <*>;
 
@@ -219,28 +222,23 @@ preconditions-list: PRECONDITIONS atomic-formula { $$ = $2; } ;
 
 effects-list: EFFECTS atomic-formula { $$ = $2; } ;
 
-problem-def: LPAREN DEFINE problem-name domain-reference objects-def init-def goal RPAREN
+problem-def: LPAREN DEFINE problem-name domain-reference objects-def init-def goal-def RPAREN
     {
         $$ = new Problem($3, $4);
         $$->set_objects($5);
         $$->set_init_state($6);
+        $$->set_goal_state($7);
     } ;
 
-problem-name: LPAREN PROBLEM NAME RPAREN
-    {
-        $$ = $3;
-    } ;
+problem-name: LPAREN PROBLEM NAME RPAREN { $$ = $3; } ;
 
-domain-reference: LPAREN DOMAIN NAME RPAREN
-    {
-        $$ = $3;
-    }
+domain-reference: LPAREN DOMAIN NAME RPAREN { $$ = $3; } ;
 
 objects-def: LPAREN OBJECTS names-list RPAREN { $$ = $3; } ;
 
 init-def: LPAREN INIT grounded-literal-list RPAREN { $$ = $3; } ;
 
-goal: LPAREN GOAL grounded-atomic-formula RPAREN {} ;
+goal-def: LPAREN GOAL grounded-atomic-formula RPAREN { $$ = $3; } ;
 
 requirekeys-list
     : REQUIREKEY { $$ = new StringList; $$->push_back($1); }
@@ -297,8 +295,8 @@ atomic-formula
     ;
 
 grounded-atomic-formula
-    : grounded-literal {}
-    | LPAREN AND grounded-literal-list RPAREN {}
+    : grounded-literal { $$ = new LiteralList; $$->push_back($1); }
+    | LPAREN AND grounded-literal-list RPAREN { $$ = $3; }
     ;
 
 predicate

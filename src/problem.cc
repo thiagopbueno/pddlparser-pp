@@ -16,6 +16,11 @@ Problem::~Problem()
 		delete literal->first;
 	}
 	delete _init;
+
+	for (auto goal : *_goal) {
+		delete goal->first;
+	}
+	delete _goal;
 }
 
 void
@@ -31,6 +36,12 @@ Problem::set_init_state(LiteralList *init)
 	_init = init;
 }
 
+void
+Problem::set_goal_state(LiteralList *goal)
+{
+	_goal = goal;
+}
+
 ostream&
 operator<<(ostream& out, const Problem& problem)
 {
@@ -44,6 +55,18 @@ operator<<(ostream& out, const Problem& problem)
 	out << endl;
 	out << "Init: [" << endl;
 	for (auto const& literal : *problem._init) {
+		if (literal->second) {
+			out << "  " << *(literal->first);
+		}
+		else {
+			out << "  NOT " << *(literal->first);
+		}
+		out <<  endl;
+	}
+	out << "]" << endl;
+	out << endl;
+	out << "Goal: [" << endl;
+	for (auto const& literal : *problem._goal) {
 		if (literal->second) {
 			out << "  " << *(literal->first);
 		}
