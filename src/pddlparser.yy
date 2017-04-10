@@ -28,14 +28,15 @@ using ParameterList = std::pair<StringList*,TypeDict*>;
 using ArgumentList  = std::pair<StringList*,TypeDict*>;
 
 using Literal       = std::pair<Predicate*,bool>;
-using AtomicFormula = std::vector<Literal*>;
-using ActionDefBody = std::pair<AtomicFormula*,AtomicFormula*>;
+using LiteralList   = std::vector<Literal*>;
+using ActionDefBody = std::pair<LiteralList*,LiteralList*>;
 
 using DomainBody    = struct {
     StringList     *requirements;
     PredicateList  *predicates;
     ActionList     *actions;
 };
+
 
 class PDDLDriver;
 }
@@ -91,6 +92,7 @@ class PDDLDriver;
 %type <std::string>        domain-name            "domain-name"
 %type <DomainBody*>        domain-body            "domain-body"
 
+%type <Problem*>           problem-def            "problem-def"
 %type <std::string>        problem-name           "problem-name"
 %type <std::string>        domain-reference       "domain-reference"
 
@@ -98,12 +100,18 @@ class PDDLDriver;
 %type <Action*>            action-def             "action-def"
 %type <ActionDefBody*>     action-def-body        "action-def-body"
 
-%type <AtomicFormula*>     preconditions-list     "preconditions-list"
-%type <AtomicFormula*>     effects-list           "effects-list"
-%type <AtomicFormula*>     atomic-formula         "atomic-formula"
+%type <LiteralList*>     preconditions-list     "preconditions-list"
+%type <LiteralList*>     effects-list           "effects-list"
+%type <LiteralList*>     atomic-formula         "atomic-formula"
 
 %type <Predicate*>         predicate              "predicate"
+%type <Predicate*>         grounded-predicate     "grounded-predicate"
+
 %type <Literal*>           literal                "literal"
+%type <LiteralList*>       literal-list           "literal-list"
+
+%type <Literal*>           grounded-literal       "grounded-literal"
+%type <LiteralList*>       grounded-literal-list  "grounded-literal-list"
 
 %type <StringList*>        requirements-def      "requirements-def"
 %type <StringList*>        requirekeys-list       "requirekeys-list"
@@ -111,11 +119,16 @@ class PDDLDriver;
 %type <PredicateList*>     predicates-def         "predicates-def"
 %type <PredicateList*>     predicates-list        "predicates-list"
 %type <ParameterList*>     parameters-list        "parameters-list"
-%type <AtomicFormula*>     literal-list           "literal-list"
 
 %type <TypeDict*>          typed-variables-list   "typed-variables-list"
 %type <StringList*>        variables-list         "variables-list"
 
+%type <StringList*>        names-list             "names-list"
+%type <TypeDict*>          typed-names-list       "typed-names-list"
+
+%type <StringList*>        objects-def            "objects-def"
+
+%type <LiteralList*>       init-def               "init-def"
 
 %printer { yyoutput << $$; } <*>;
 
@@ -126,8 +139,8 @@ class PDDLDriver;
 %start pddl;
 
 pddl
-    : domain-def  { driver.domain = $1; }
-    | problem {}
+    : domain-def  { driver.domain  = $1; }
+    | problem-def { driver.problem = $1; }
     ;
 
 domain-def: LPAREN DEFINE domain-name domain-body RPAREN
@@ -206,12 +219,16 @@ preconditions-list: PRECONDITIONS atomic-formula { $$ = $2; } ;
 
 effects-list: EFFECTS atomic-formula { $$ = $2; } ;
 
-problem: LPAREN DEFINE problem-name domain-reference objects init goal RPAREN {} ;
+problem-def: LPAREN DEFINE problem-name domain-reference objects-def init-def goal RPAREN
+    {
+        $$ = new Problem($3, $4);
+        $$->set_objects($5);
+        $$->set_init_state($6);
+    } ;
 
 problem-name: LPAREN PROBLEM NAME RPAREN
     {
         $$ = $3;
-        driver.problem = new Problem($$);
     } ;
 
 domain-reference: LPAREN DOMAIN NAME RPAREN
@@ -219,9 +236,9 @@ domain-reference: LPAREN DOMAIN NAME RPAREN
         $$ = $3;
     }
 
-objects: LPAREN OBJECTS names-list RPAREN {} ;
+objects-def: LPAREN OBJECTS names-list RPAREN { $$ = $3; } ;
 
-init: LPAREN INIT grounded-literal-list RPAREN {} ;
+init-def: LPAREN INIT grounded-literal-list RPAREN { $$ = $3; } ;
 
 goal: LPAREN GOAL grounded-atomic-formula RPAREN {} ;
 
@@ -231,8 +248,8 @@ requirekeys-list
     ;
 
 names-list
-    : NAME {}
-    | names-list NAME {}
+    : NAME { $$ = new StringList; $$->push_back($1); }
+    | names-list NAME { $1->push_back($2); $$ = $1; }
     ;
 
 typed-names-list
@@ -265,17 +282,17 @@ typed-variables-list
     ;
 
 literal-list
-    : literal { $$ = new AtomicFormula; $$->push_back($1); }
+    : literal { $$ = new LiteralList; $$->push_back($1); }
     | literal-list literal { $1->push_back($2); $$ = $1; }
     ;
 
 grounded-literal-list
-    : grounded-literal {}
-    | grounded-literal-list grounded-literal {}
+    : grounded-literal { $$ = new LiteralList; $$->push_back($1); }
+    | grounded-literal-list grounded-literal { $1->push_back($2); $$ = $1; }
     ;
 
 atomic-formula
-    : literal { $$ = new AtomicFormula; $$->push_back($1); }
+    : literal { $$ = new LiteralList; $$->push_back($1); }
     | LPAREN AND literal-list RPAREN { $$ = $3; }
     ;
 
@@ -310,8 +327,19 @@ predicate
     ;
 
 grounded-predicate
-    : LPAREN NAME names-list RPAREN {}
-    | LPAREN EQUAL NAME NAME RPAREN {}
+    : LPAREN NAME names-list RPAREN
+        {
+            auto args = new ArgumentList($3, nullptr);
+            $$ = new Predicate($2, args);
+        }
+    | LPAREN EQUAL NAME NAME RPAREN
+        {
+            StringList *vars = new StringList(2);
+            (*vars)[0] = $3;
+            (*vars)[1] = $4;
+            auto args = new ArgumentList(vars, nullptr);
+            $$ = new Predicate("=", args);
+        }
     ;
 
 literal
@@ -320,8 +348,8 @@ literal
     ;
 
 grounded-literal
-    : grounded-predicate {}
-    | LPAREN NOT grounded-predicate RPAREN {}
+    : grounded-predicate { $$ = new Literal($1, true); }
+    | LPAREN NOT grounded-predicate RPAREN { $$ = new Literal($3, false); }
     ;
 
 

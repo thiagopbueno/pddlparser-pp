@@ -3,15 +3,31 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+#include <tuple>
+
+#include "predicate.hh"
+
+using StringList    = std::vector<std::string>;
+using Literal       = std::pair<Predicate*,bool>;
+using LiteralList   = std::vector<Literal*>;
 
 class Problem {
 public:
-	Problem(const std::string &name);
+	Problem(const std::string& name, const std::string& domain);
+	virtual ~Problem();
 
-	friend std::ostream &operator<<(std::ostream &os, const Problem &problem);
+	void set_objects(StringList *objects);
+	void set_init_state(LiteralList *init);
+
+	friend std::ostream &operator<<(std::ostream& out, const Problem& problem);
 
 private:
 	std::string _name;
+	std::string _domain;
+
+	StringList  *_objects;
+	LiteralList *_init;
 };
 
 #endif // _PROBLEM_HH_
