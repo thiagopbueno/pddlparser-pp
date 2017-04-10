@@ -13,13 +13,17 @@ public:
 	Domain(const std::string &name);
 	virtual ~Domain();
 
-	void add_action(const Action *action);
+	void set_requirements(std::vector<std::string>* requirements);
+	void set_predicates(std::vector<Predicate*>* predicates);
+	void set_actions(std::vector<Action*>* actions);
 
 	friend std::ostream &operator<<(std::ostream &os, const Domain &domain);
 
 private:
-	std::string _name;
-	std::vector<const Action*> _actions;
+	std::string               _name;
+	std::vector<std::string> *_requirements;
+	std::vector<Predicate*>  *_predicates;
+	std::vector<Action*>     *_actions;
 };
 
 #endif // _DOMAIN_HH_
