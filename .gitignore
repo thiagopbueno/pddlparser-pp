@@ -10,3 +10,4 @@ stack.hh
 src/*.yy.cc
 src/*.tab.cc
 src/*.output
+build/
